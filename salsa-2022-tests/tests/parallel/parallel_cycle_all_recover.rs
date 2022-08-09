@@ -18,7 +18,7 @@ pub(crate) struct MyInput {
     field: i32,
 }
 
-#[salsa::tracked(jar = Jar)]
+#[salsa::tracked(jar = Jar, recovery_fn=recover_a1)]
 pub(crate) fn a1(db: &dyn Db, input: MyInput) -> i32 {
     // Wait to create the cycle until both threads have entered
     db.signal(1);
@@ -26,17 +26,23 @@ pub(crate) fn a1(db: &dyn Db, input: MyInput) -> i32 {
 
     a2(db, input)
 }
-#[salsa::tracked(jar = Jar, recovery_fn=recover)]
+
+fn recover_a1(db: &dyn Db, _cycle: &salsa::Cycle, key: MyInput) -> i32 {
+    dbg!("recover_a1");
+    key.field(db) * 10 + 1
+}
+
+#[salsa::tracked(jar = Jar, recovery_fn=recover_a2)]
 pub(crate) fn a2(db: &dyn Db, input: MyInput) -> i32 {
     b1(db, input)
 }
 
-fn recover(db: &dyn Db, _cycle: &salsa::Cycle, key: MyInput) -> i32 {
-    dbg!("recover");
-    key.field(db) * 20 + 2
+fn recover_a2(db: &dyn Db, _cycle: &salsa::Cycle, key: MyInput) -> i32 {
+    dbg!("recover_a2");
+    key.field(db) * 10 + 2
 }
 
-#[salsa::tracked(jar = Jar)]
+#[salsa::tracked(jar = Jar, recovery_fn=recover_b1)]
 pub(crate) fn b1(db: &dyn Db, input: MyInput) -> i32 {
     // Wait to create the cycle until both threads have entered
     db.wait_for(1);
@@ -47,9 +53,19 @@ pub(crate) fn b1(db: &dyn Db, input: MyInput) -> i32 {
     b2(db, input)
 }
 
-#[salsa::tracked(jar = Jar)]
+fn recover_b1(db: &dyn Db, _cycle: &salsa::Cycle, key: MyInput) -> i32 {
+    dbg!("recover_b1");
+    key.field(db) * 20 + 1
+}
+
+#[salsa::tracked(jar = Jar, recovery_fn=recover_b2)]
 pub(crate) fn b2(db: &dyn Db, input: MyInput) -> i32 {
     a1(db, input)
+}
+
+fn recover_b2(db: &dyn Db, _cycle: &salsa::Cycle, key: MyInput) -> i32 {
+    dbg!("recover_b2");
+    key.field(db) * 20 + 2
 }
 
 // Recover cycle test:
@@ -68,11 +84,11 @@ pub(crate) fn b2(db: &dyn Db, input: MyInput) -> i32 {
 // b1 (blocks -> stage 3)     |
 // |                          (unblocked)
 // |                          b2
-// |                          a1 (cycle detected)
-// a2 recovery fn executes    |
-// a1 completes normally      |
-//                            b2 completes, recovers
-//                            b1 completes, recovers
+// |                          a1 (cycle detected, recovers)
+// |                          b2 completes, recovers
+// |                          b1 completes, recovers
+// a2 sees cycle, recovers
+// a1 completes, recovers
 
 #[test]
 fn execute() {
@@ -91,9 +107,6 @@ fn execute() {
         move || b1(&*db, input)
     });
 
-    // We expect that the recovery function yields
-    // `1 * 20 + 2`, which is returned (and forwarded)
-    // to b1, and from there to a2 and a1.
-    assert_eq!(thread_a.join().unwrap(), 22);
-    assert_eq!(thread_b.join().unwrap(), 22);
+    assert_eq!(thread_a.join().unwrap(), 11);
+    assert_eq!(thread_b.join().unwrap(), 21);
 }

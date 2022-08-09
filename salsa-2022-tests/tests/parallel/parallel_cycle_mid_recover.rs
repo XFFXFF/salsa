@@ -2,59 +2,20 @@
 //! See `../cycles.rs` for a complete listing of cycle tests,
 //! both intra and cross thread.
 
-use crate::setup::Knobs;
 use crate::setup::Database as DatabaseImpl;
+use crate::setup::Knobs;
 use salsa::ParallelDatabase;
-use crate::setup::Jar;
-use crate::setup::Db;
 
-// Recover cycle test:
-//
-// The pattern is as follows.
-//
-// Thread A                   Thread B
-// --------                   --------
-// a1                         b1
-// |                          wait for stage 1 (blocks)
-// signal stage 1             |
-// wait for stage 2 (blocks)  (unblocked)
-// |                          |
-// |                          b2
-// |                          b3
-// |                          a1 (blocks -> stage 2)
-// (unblocked)                |
-// a2 (cycle detected)        |
-//                            b3 recovers
-//                            b2 resumes
-//                            b1 panics because bug
+pub(crate) trait Db: salsa::DbWithJar<Jar> + Knobs {}
 
-#[test]
-fn execute() {
-    let mut db = DatabaseImpl::default();
-    db.knobs().signal_on_will_block.set(3);
+impl<T: salsa::DbWithJar<Jar> + Knobs> Db for T {}
 
-    let input = MyInput::new(&mut db, 1);
-
-    let thread_a = std::thread::spawn({
-        let db = db.snapshot();
-        move || a1(&*db, input)
-    });
-
-    let thread_b = std::thread::spawn({
-        let db = db.snapshot();
-        move || b1(&*db, input)
-    });
-
-    // We expect that the recovery function yields
-    // `1 * 20 + 2`, which is returned (and forwarded)
-    // to b1, and from there to a2 and a1.
-    assert_eq!(thread_a.join().unwrap(), 22);
-    assert_eq!(thread_b.join().unwrap(), 22);
-}
+#[salsa::jar(db = Db)]
+pub(crate) struct Jar(MyInput, a1, a2, b1, b2, b3);
 
 #[salsa::input(jar = Jar)]
 pub(crate) struct MyInput {
-    field: i32
+    field: i32,
 }
 
 #[salsa::tracked(jar = Jar)]
@@ -102,4 +63,48 @@ pub(crate) fn b3(db: &dyn Db, input: MyInput) -> i32 {
 fn recover_b3(db: &dyn Db, _cycle: &salsa::Cycle, key: MyInput) -> i32 {
     dbg!("recover_b3");
     key.field(db) * 200 + 2
+}
+
+// Recover cycle test:
+//
+// The pattern is as follows.
+//
+// Thread A                   Thread B
+// --------                   --------
+// a1                         b1
+// |                          wait for stage 1 (blocks)
+// signal stage 1             |
+// wait for stage 2 (blocks)  (unblocked)
+// |                          |
+// |                          b2
+// |                          b3
+// |                          a1 (blocks -> stage 2)
+// (unblocked)                |
+// a2 (cycle detected)        |
+//                            b3 recovers
+//                            b2 resumes
+//                            b1 recovers
+
+#[test]
+fn execute() {
+    let mut db = DatabaseImpl::default();
+    db.knobs().signal_on_will_block.set(3);
+
+    let input = MyInput::new(&mut db, 1);
+
+    let thread_a = std::thread::spawn({
+        let db = db.snapshot();
+        move || a1(&*db, input)
+    });
+
+    let thread_b = std::thread::spawn({
+        let db = db.snapshot();
+        move || b1(&*db, input)
+    });
+
+    // We expect that the recovery function yields
+    // `1 * 20 + 2`, which is returned (and forwarded)
+    // to b1, and from there to a2 and a1.
+    assert_eq!(thread_a.join().unwrap(), 22);
+    assert_eq!(thread_b.join().unwrap(), 22);
 }
