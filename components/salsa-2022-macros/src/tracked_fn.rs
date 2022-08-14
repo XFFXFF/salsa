@@ -220,6 +220,8 @@ fn ingredients_for_impl(
         }
     };
 
+    let name = Literal::string(&item_fn.sig.ident.to_string());
+
     parse_quote! {
         impl salsa::storage::IngredientsFor for #config_ty {
             type Ingredients = Self;
@@ -239,7 +241,7 @@ fn ingredients_for_impl(
                                 <_ as salsa::storage::HasIngredientsFor<Self::Ingredients>>::ingredient(jar);
                             &ingredients.function
                         });
-                        salsa::function::FunctionIngredient::new(index)
+                        salsa::function::FunctionIngredient::new(index, #name)
                     },
                 }
             }

@@ -131,6 +131,9 @@ impl InputStruct {
         let ident = self.id_ident();
         let jar_ty = self.jar_ty();
         let all_field_indices: Vec<Literal> = self.all_field_indices();
+        let all_field_names =  self.all_field_names().iter()
+            .map(|ident| ident.to_string())
+            .collect::<Vec<String>>();
         let input_index: Literal = self.input_index();
         let config_struct_names = config_structs.iter().map(|s| &s.ident);
 
@@ -160,7 +163,7 @@ impl InputStruct {
                                         &ingredients.#all_field_indices
                                     },
                                 );
-                                salsa::function::FunctionIngredient::new(index)
+                                salsa::function::FunctionIngredient::new(index, #all_field_names)
                             },
                         )*
                         {

@@ -154,6 +154,7 @@ impl TrackedStruct {
         let jar_ty = self.jar_ty();
         let id_field_tys: Vec<&syn::Type> = self.id_fields().map(SalsaField::ty).collect();
         let value_field_indices: Vec<Literal> = self.value_field_indices();
+        let value_field_names = self.value_field_names().iter().map(|ident| Literal::string(&ident.to_string())).collect::<Vec<Literal>>();
         let tracked_struct_index: Literal = self.tracked_struct_index();
         let config_struct_names = config_structs.iter().map(|s| &s.ident);
 
@@ -183,7 +184,7 @@ impl TrackedStruct {
                                         &ingredients.#value_field_indices
                                     },
                                 );
-                                salsa::function::FunctionIngredient::new(index)
+                                salsa::function::FunctionIngredient::new(index, #value_field_names)
                             },
                         )*
                         {
@@ -267,6 +268,10 @@ impl TrackedStruct {
         (0..self.value_fields().count())
             .map(|i| Literal::usize_unsuffixed(i))
             .collect()
+    }
+
+    fn value_field_names(&self) -> Vec<&syn::Ident> {
+        self.value_fields().map(|sf| sf.name()).collect()
     }
 
     /// Indices of each of the id fields

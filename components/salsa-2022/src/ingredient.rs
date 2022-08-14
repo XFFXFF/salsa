@@ -33,6 +33,12 @@ pub trait Ingredient<DB: ?Sized> {
     ///
     /// This hook is used to clear out the stale value so others cannot read it.
     fn remove_stale_output(&self, db: &DB, executor: DatabaseKeyIndex, stale_output_key: Id);
+
+    fn fmt_index(
+        &self,
+        index: Option<Id>,
+        fmt: &mut std::fmt::Formatter<'_>,
+    ) -> std::fmt::Result;
 }
 
 /// Optional trait for ingredients that wish to be notified when new revisions are

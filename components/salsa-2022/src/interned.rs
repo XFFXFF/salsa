@@ -217,6 +217,15 @@ where
             executor, stale_output_key
         );
     }
+
+    fn fmt_index(
+        &self,
+        index: Option<crate::Id>,
+        fmt: &mut std::fmt::Formatter<'_>,
+    ) -> std::fmt::Result {
+        write!(fmt, "{:?}", index)
+    }
+    
 }
 
 pub struct IdentityInterner<Id: AsId> {

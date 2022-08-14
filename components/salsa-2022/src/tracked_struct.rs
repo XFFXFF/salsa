@@ -133,6 +133,16 @@ where
         // FIXME -- we can delete this entity
         drop((executor, key));
     }
+
+    fn fmt_index(
+        &self,
+        index: Option<crate::Id>,
+        fmt: &mut std::fmt::Formatter<'_>,
+    ) -> std::fmt::Result {
+        write!(fmt, "{:?}", index)
+    }
+
+    
 }
 
 impl<DB: ?Sized, Id, Data> MutIngredient<DB> for TrackedStructIngredient<Id, Data>

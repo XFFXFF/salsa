@@ -67,6 +67,8 @@ pub struct FunctionIngredient<C: Configuration> {
     /// we don't know that we can trust the database to give us the same runtime
     /// everytime and so forth.
     deleted_entries: SegQueue<ArcSwap<memo::Memo<C::Value>>>,
+
+    debug_name: &'static str,
 }
 
 pub trait Configuration {
@@ -133,13 +135,14 @@ impl<C> FunctionIngredient<C>
 where
     C: Configuration,
 {
-    pub fn new(index: IngredientIndex) -> Self {
+    pub fn new(index: IngredientIndex, debug_name: &'static str) -> Self {
         Self {
             index,
             memo_map: memo::MemoMap::default(),
             lru: Default::default(),
             sync_map: Default::default(),
             deleted_entries: Default::default(),
+            debug_name,
         }
     }
 
@@ -220,6 +223,15 @@ where
         // but not in rev 2. We don't do anything in this case, we just leave the (now stale) memo.
         // Since its `verified_at` field has not changed, it will be considered dirty if it is invoked.
     }
+
+    fn fmt_index(
+        &self,
+        index: Option<Id>,
+        fmt: &mut std::fmt::Formatter<'_>,
+    ) -> std::fmt::Result {
+        todo!()
+    }
+    
 }
 
 impl<DB, C> MutIngredient<DB> for FunctionIngredient<C>
