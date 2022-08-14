@@ -183,6 +183,12 @@ pub trait HasJarsDyn {
     fn mark_validated_output(&self, executor: DatabaseKeyIndex, output: DatabaseKeyIndex);
 
     fn remove_stale_output(&self, executor: DatabaseKeyIndex, stale_output: DatabaseKeyIndex);
+
+    fn fmt_index(
+        &self,
+        index: Option<DependencyIndex>,
+        fmt: &mut std::fmt::Formatter<'_>,
+    ) -> std::fmt::Result;
 }
 
 pub trait HasIngredientsFor<I>

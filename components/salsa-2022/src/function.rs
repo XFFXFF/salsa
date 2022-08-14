@@ -229,7 +229,7 @@ where
         index: Option<Id>,
         fmt: &mut std::fmt::Formatter<'_>,
     ) -> std::fmt::Result {
-        todo!()
+        write!(fmt, "{}", self.debug_name)
     }
     
 }
