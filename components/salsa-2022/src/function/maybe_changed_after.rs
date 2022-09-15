@@ -174,7 +174,12 @@ where
                 // This value was `set` by the mutator thread -- ie, it's a base input and it cannot be out of date.
                 return true;
             }
-            QueryOrigin::Field => {
+            QueryOrigin::Field(by_query) => {
+                if let Some(keys) = db.runtime().query_database_key_index() {
+                    if keys.contains(by_query) {
+                        return true;
+                    }
+                }
                 // This value is the value of a field of some tracked struct S.
                 // The fact that we are here means that we are accessing fields from old revisions, which is not allowed.
                 panic!(

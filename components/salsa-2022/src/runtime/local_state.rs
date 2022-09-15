@@ -62,7 +62,7 @@ pub enum QueryOrigin {
 
     /// This is the value field of a tracked struct.
     /// These are different from `Assigned` because we know they will always be assigned a value and hence are never "out of date".
-    Field,
+    Field(DatabaseKeyIndex),
 
     /// This value was set as a base input to the computation.
     BaseInput,
@@ -86,7 +86,7 @@ impl QueryOrigin {
             QueryOrigin::Derived(edges) | QueryOrigin::DerivedUntracked(edges) => {
                 &edges.input_outputs[edges.separator as usize..]
             }
-            QueryOrigin::Assigned(_) | QueryOrigin::BaseInput | QueryOrigin::Field => &[],
+            QueryOrigin::Assigned(_) | QueryOrigin::BaseInput | QueryOrigin::Field(_) => &[],
         };
 
         slice.iter().copied()
@@ -278,6 +278,13 @@ impl LocalState {
             "query stack already taken"
         );
         self.query_stack.take().unwrap()
+    }
+
+    pub fn query_database_key_index(&self) -> Option<Vec<DatabaseKeyIndex>> {
+        self.query_stack
+            .borrow()
+            .as_ref()
+            .and_then(|v| Some(v.iter().map(|query| query.database_key_index).collect::<Vec<DatabaseKeyIndex>>()))
     }
 
     /// Restores a query stack taken with [`Self::take_query_stack`] once

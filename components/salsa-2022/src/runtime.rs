@@ -243,6 +243,10 @@ impl Runtime {
         self.local_state.push_query(database_key_index)
     }
 
+    pub(crate) fn query_database_key_index(&self) -> Option<Vec<DatabaseKeyIndex>> {
+        self.local_state.query_database_key_index()
+    }
+
     /// Block until `other_id` completes executing `database_key`;
     /// panic or unwind in the case of a cycle.
     ///
