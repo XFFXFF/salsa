@@ -1,7 +1,7 @@
 /// Utility for tests that lets us log when notable events happen.
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct Logger {
-    logs: std::sync::Mutex<Vec<String>>,
+    logs: std::sync::Arc<std::sync::Mutex<Vec<String>>>,
 }
 
 /// Trait implemented by databases that lets them log events.
