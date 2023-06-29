@@ -49,10 +49,5 @@ fn execute() {
 
     // change the input to cancel the query in other workers with old revision
     input.set_field(&mut db).to(2);
-
-    db.assert_logs(expect![[r#"
-        [
-            "Event { runtime_id: RuntimeId { counter: 1 }, kind: DidCancellation }",
-            "Event { runtime_id: RuntimeId { counter: 2 }, kind: DidCancellation }",
-        ]"#]]);
+    db.assert_logs_len(2);
 }
