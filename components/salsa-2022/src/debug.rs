@@ -111,6 +111,12 @@ where
     }
 }
 
+impl<Db: ?Sized> DebugWithDb<Db> for () {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>, _: &Db, _: bool) -> fmt::Result {
+        f.debug_tuple("").finish()
+    }
+}
+
 impl<Db: ?Sized, T: ?Sized> DebugWithDb<Db> for Box<T>
 where
     T: DebugWithDb<Db>,

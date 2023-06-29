@@ -2,7 +2,7 @@ use std::fmt;
 
 use crate::{
     cycle::CycleRecoveryStrategy, key::DependencyIndex, runtime::local_state::QueryOrigin,
-    DatabaseKeyIndex, Id,
+    DatabaseKeyIndex, DebugWithDb, Id,
 };
 
 use super::Revision;
@@ -62,17 +62,23 @@ pub trait Ingredient<DB: ?Sized> {
     /// [`IngredientRequiresReset::RESET_ON_NEW_REVISION`] to true.
     fn reset_for_new_revision(&mut self);
 
-    fn fmt_index(&self, index: Option<crate::Id>, fmt: &mut fmt::Formatter<'_>) -> fmt::Result;
+    fn fmt_index(
+        &self,
+        index: Option<crate::Id>,
+        db: &DB,
+        fmt: &mut fmt::Formatter<'_>,
+    ) -> fmt::Result;
 }
 
 /// A helper function to show human readable fmt.
-pub(crate) fn fmt_index(
+pub(crate) fn fmt_index<DB: ?Sized>(
     debug_name: &str,
-    id: Option<Id>,
+    id: Option<impl DebugWithDb<DB>>,
+    db: &DB,
     fmt: &mut fmt::Formatter<'_>,
 ) -> fmt::Result {
     if let Some(i) = id {
-        write!(fmt, "{}({})", debug_name, u32::from(i))
+        write!(fmt, "{}({:?})", debug_name, i.debug(db))
     } else {
         write!(fmt, "{}()", debug_name)
     }

@@ -241,8 +241,13 @@ where
         panic!("unexpected call: interned ingredients do not register for salsa struct deletion events");
     }
 
-    fn fmt_index(&self, index: Option<crate::Id>, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
-        fmt_index(self.debug_name, index, fmt)
+    fn fmt_index(
+        &self,
+        index: Option<crate::Id>,
+        db: &DB,
+        fmt: &mut fmt::Formatter<'_>,
+    ) -> fmt::Result {
+        fmt_index(self.debug_name, index, db, fmt)
     }
 }
 

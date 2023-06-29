@@ -112,8 +112,9 @@ unsafe fn transmute_lifetime<'t, 'u, T, U>(_t: &'t T, u: &'u U) -> &'t U {
     std::mem::transmute(u)
 }
 
-impl<DB: ?Sized, K, F> Ingredient<DB> for InputFieldIngredient<K, F>
+impl<DB, K, F> Ingredient<DB> for InputFieldIngredient<K, F>
 where
+    DB: ?Sized,
     K: AsId,
 {
     fn cycle_recovery_strategy(&self) -> CycleRecoveryStrategy {
@@ -153,8 +154,13 @@ where
         panic!("unexpected call: input fields don't register for resets");
     }
 
-    fn fmt_index(&self, index: Option<crate::Id>, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
-        fmt_index(self.debug_name, index, fmt)
+    fn fmt_index(
+        &self,
+        index: Option<crate::Id>,
+        db: &DB,
+        fmt: &mut fmt::Formatter<'_>,
+    ) -> fmt::Result {
+        fmt_index(self.debug_name, index, db, fmt)
     }
 }
 

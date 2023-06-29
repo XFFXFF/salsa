@@ -246,7 +246,7 @@ fn fix_bad_variable_in_function() {
             "#]],
             expect![[r#"
                 [
-                    "Event: Event { runtime_id: RuntimeId { counter: 0 }, kind: WillExecute { database_key: parse_statements(0) } }",
+                    "Event: Event { runtime_id: RuntimeId { counter: 0 }, kind: WillExecute { database_key: parse_statements(SourceProgram { [salsa id]: 0 }) } }",
                     "Event: Event { runtime_id: RuntimeId { counter: 0 }, kind: WillExecute { database_key: type_check_function(0) } }",
                 ]
             "#]],
