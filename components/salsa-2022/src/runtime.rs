@@ -211,9 +211,10 @@ impl Runtime {
             kind: EventKind::WillCheckCancellation,
         });
         if self.shared_state.revision_canceled.load() {
+            dbg!(&"hello");
             db.salsa_event(Event {
                 runtime_id: self.id(),
-                kind: EventKind::WillCheckCancellation,
+                kind: EventKind::DidCancellation,
             });
             self.unwind_cancelled();
         }

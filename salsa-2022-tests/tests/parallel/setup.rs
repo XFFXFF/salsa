@@ -1,6 +1,8 @@
 use std::{cell::Cell, sync::Arc};
 
 use crate::signal::Signal;
+use salsa_2022_tests::HasLogger;
+use salsa_2022_tests::Logger;
 
 /// Various "knobs" and utilities used by tests to force
 /// a certain behavior.
@@ -29,18 +31,22 @@ pub(crate) struct KnobsStruct {
     crate::parallel_cycle_one_recover::Jar,
     crate::parallel_cycle_none_recover::Jar,
     crate::parallel_cycle_mid_recover::Jar,
-    crate::parallel_cycle_all_recover::Jar
+    crate::parallel_cycle_all_recover::Jar,
+    crate::parallel_cancel_other_worker::Jar,
 )]
 #[derive(Default)]
 pub(crate) struct Database {
     storage: salsa::Storage<Self>,
     knobs: KnobsStruct,
+    logger: Logger
 }
 
 impl salsa::Database for Database {
     fn salsa_event(&self, event: salsa::Event) {
         if let salsa::EventKind::WillBlockOn { .. } = event.kind {
             self.signal(self.knobs().signal_on_will_block.get());
+        } else if let salsa::EventKind::DidCancellation { .. } = event.kind {
+            self.push_log(format!("{:?}", event));
         }
     }
 }
@@ -50,6 +56,7 @@ impl salsa::ParallelDatabase for Database {
         salsa::Snapshot::new(Database {
             storage: self.storage.snapshot(),
             knobs: self.knobs.clone(),
+            logger: self.logger.clone(),
         })
     }
 }
@@ -65,5 +72,11 @@ impl Knobs for Database {
 
     fn wait_for(&self, stage: usize) {
         self.knobs.signal.wait_for(stage);
+    }
+}
+
+impl HasLogger for Database {
+    fn logger(&self) -> &Logger {
+        &self.logger
     }
 }

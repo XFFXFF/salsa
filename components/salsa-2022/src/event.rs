@@ -82,6 +82,10 @@ pub enum EventKind {
     /// the current revision has been cancelled.
     WillCheckCancellation,
 
+    /// Indicates that `unwind_cancelled` was called and salsa will unwind if
+    /// the current revision has been cancelled.
+    DidCancellation,
+
     /// Discovered that a query used to output a given output but no longer does.
     WillDiscardStaleOutput {
         /// Key for the query that is executing and which no longer outputs the given value.
@@ -127,6 +131,7 @@ impl fmt::Debug for EventKind {
                 .field("database_key", database_key)
                 .finish(),
             EventKind::WillCheckCancellation => fmt.debug_struct("WillCheckCancellation").finish(),
+            EventKind::DidCancellation => fmt.debug_struct("DidCancellation").finish(),
             EventKind::WillDiscardStaleOutput {
                 execute_key,
                 output_key,
@@ -187,6 +192,7 @@ where
                 )
                 .finish(),
             EventKind::WillCheckCancellation => fmt.debug_struct("WillCheckCancellation").finish(),
+            EventKind::DidCancellation => fmt.debug_struct("DidCancellation").finish(),
             EventKind::WillDiscardStaleOutput {
                 execute_key,
                 output_key,
