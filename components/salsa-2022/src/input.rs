@@ -64,9 +64,10 @@ where
     }
 }
 
-impl<DB: ?Sized, Id> Ingredient<DB> for InputIngredient<Id>
+impl<DB, Id> Ingredient<DB> for InputIngredient<Id>
 where
     Id: InputId,
+    DB: ?Sized,
 {
     fn maybe_changed_after(&self, _db: &DB, _input: DependencyIndex, _revision: Revision) -> bool {
         // Input ingredients are just a counter, they store no data, they are immortal.
@@ -116,8 +117,13 @@ where
         );
     }
 
-    fn fmt_index(&self, index: Option<crate::Id>, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
-        fmt_index(self.debug_name, index, fmt)
+    fn fmt_index(
+        &self,
+        index: Option<crate::Id>,
+        db: &DB,
+        fmt: &mut fmt::Formatter<'_>,
+    ) -> fmt::Result {
+        fmt_index(self.debug_name, index, db, fmt)
     }
 }
 

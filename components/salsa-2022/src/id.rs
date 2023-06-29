@@ -2,6 +2,8 @@ use std::fmt::Debug;
 use std::hash::Hash;
 use std::num::NonZeroU32;
 
+use crate::DebugWithDb;
+
 /// An Id is a newtype'd u32 ranging from `0..Id::MAX_U32`.
 /// The maximum range is smaller than a standard u32 to leave
 /// room for niches; currently there is only one niche, so that
@@ -90,5 +92,20 @@ impl AsId for () {
 
     fn from_id(id: Id) -> Self {
         assert_eq!(0, id.as_u32());
+    }
+}
+
+impl<Db: ?Sized> DebugWithDb<Db> for Id {
+    fn fmt(
+        &self,
+        f: &mut std::fmt::Formatter<'_>,
+        _db: &Db,
+        include_all_fields: bool,
+    ) -> std::fmt::Result {
+        if include_all_fields {
+            write!(f, "Id({})", self.as_u32())
+        } else {
+            write!(f, "{}", self.as_u32())
+        }
     }
 }

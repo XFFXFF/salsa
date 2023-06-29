@@ -10,7 +10,7 @@ use crate::{
     key::{DatabaseKeyIndex, DependencyIndex},
     runtime::local_state::QueryOrigin,
     salsa_struct::SalsaStructInDb,
-    Cycle, DbWithJar, Event, EventKind, Id, Revision,
+    Cycle, DbWithJar, DebugWithDb, Event, EventKind, Id, Revision,
 };
 
 use super::{ingredient::Ingredient, routes::IngredientIndex, AsId};
@@ -86,7 +86,7 @@ pub trait Configuration {
     /// What key is used to index the memo. Typically a salsa struct id,
     /// but if this memoized function has multiple arguments it will be a `salsa::Id`
     /// that results from interning those arguments.
-    type Key: AsId;
+    type Key: AsId + for<'db> DebugWithDb<DynDb<'db, Self>>;
 
     /// The value computed by the function.
     type Value: fmt::Debug;
@@ -273,8 +273,14 @@ where
         }
     }
 
-    fn fmt_index(&self, index: Option<crate::Id>, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
-        fmt_index(self.debug_name, index, fmt)
+    fn fmt_index(
+        &self,
+        index: Option<crate::Id>,
+        db: &DB,
+        fmt: &mut fmt::Formatter<'_>,
+    ) -> fmt::Result {
+        let database_key_index = index.map(|index| C::key_from_id(index));
+        fmt_index(self.debug_name, database_key_index, db.as_jar_db(), fmt)
     }
 }
 

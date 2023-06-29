@@ -166,7 +166,7 @@ fn has_jars_dyn_impl(input: &syn::ItemStruct, storage: &syn::Ident) -> syn::Item
 
             fn fmt_index(&self, index: salsa::key::DependencyIndex, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                 let ingredient = self.#storage.ingredient(index.ingredient_index());
-                ingredient.fmt_index(index.key_index(), fmt)
+                ingredient.fmt_index(index.key_index(), self, fmt)
             }
         }
     }

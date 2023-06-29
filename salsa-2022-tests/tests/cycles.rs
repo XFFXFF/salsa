@@ -187,8 +187,8 @@ fn cycle_memoized() {
     let cycle = extract_cycle(|| memoized_a(&db, input));
     let expected = expect![[r#"
         [
-            "memoized_a(0)",
-            "memoized_b(0)",
+            "memoized_a(MyInput { [salsa id]: 0 })",
+            "memoized_b(MyInput { [salsa id]: 0 })",
         ]
     "#]];
     expected.assert_debug_eq(&cycle.all_participants(&db));
@@ -201,8 +201,8 @@ fn cycle_volatile() {
     let cycle = extract_cycle(|| volatile_a(&db, input));
     let expected = expect![[r#"
         [
-            "volatile_a(0)",
-            "volatile_b(0)",
+            "volatile_a(MyInput { [salsa id]: 0 })",
+            "volatile_b(MyInput { [salsa id]: 0 })",
         ]
     "#]];
     expected.assert_debug_eq(&cycle.all_participants(&db));
@@ -230,8 +230,8 @@ fn inner_cycle() {
     assert!(err.is_err());
     let expected = expect![[r#"
         [
-            "cycle_a(0)",
-            "cycle_b(0)",
+            "cycle_a(ABC { [salsa id]: 0 })",
+            "cycle_b(ABC { [salsa id]: 0 })",
         ]
     "#]];
     expected.assert_debug_eq(&err.unwrap_err().cycle);
@@ -338,8 +338,8 @@ fn cycle_mixed_1() {
 
     let expected = expect![[r#"
         [
-            "cycle_b(0)",
-            "cycle_c(0)",
+            "cycle_b(ABC { [salsa id]: 0 })",
+            "cycle_c(ABC { [salsa id]: 0 })",
         ]
     "#]];
     expected.assert_debug_eq(&cycle_c(&db, abc).unwrap_err().cycle);
@@ -357,9 +357,9 @@ fn cycle_mixed_2() {
     let abc = ABC::new(&db, CycleQuery::B, CycleQuery::C, CycleQuery::A);
     let expected = expect![[r#"
         [
-            "cycle_a(0)",
-            "cycle_b(0)",
-            "cycle_c(0)",
+            "cycle_a(ABC { [salsa id]: 0 })",
+            "cycle_b(ABC { [salsa id]: 0 })",
+            "cycle_c(ABC { [salsa id]: 0 })",
         ]
     "#]];
     expected.assert_debug_eq(&cycle_a(&db, abc).unwrap_err().cycle);
@@ -384,12 +384,12 @@ fn cycle_deterministic_order() {
     let expected = expect![[r#"
         (
             [
-                "cycle_a(0)",
-                "cycle_b(0)",
+                "cycle_a(ABC { [salsa id]: 0 })",
+                "cycle_b(ABC { [salsa id]: 0 })",
             ],
             [
-                "cycle_a(0)",
-                "cycle_b(0)",
+                "cycle_a(ABC { [salsa id]: 0 })",
+                "cycle_b(ABC { [salsa id]: 0 })",
             ],
         )
     "#]];
@@ -419,16 +419,16 @@ fn cycle_multiple() {
     let expected = expect![[r#"
         (
             [
-                "cycle_a(0)",
-                "cycle_b(0)",
+                "cycle_a(ABC { [salsa id]: 0 })",
+                "cycle_b(ABC { [salsa id]: 0 })",
             ],
             [
-                "cycle_a(0)",
-                "cycle_b(0)",
+                "cycle_a(ABC { [salsa id]: 0 })",
+                "cycle_b(ABC { [salsa id]: 0 })",
             ],
             [
-                "cycle_a(0)",
-                "cycle_b(0)",
+                "cycle_a(ABC { [salsa id]: 0 })",
+                "cycle_b(ABC { [salsa id]: 0 })",
             ],
         )
     "#]];
@@ -452,7 +452,7 @@ fn cycle_recovery_set_but_not_participating() {
     let r = extract_cycle(|| drop(cycle_a(&db, abc)));
     let expected = expect![[r#"
         [
-            "cycle_c(0)",
+            "cycle_c(ABC { [salsa id]: 0 })",
         ]
     "#]];
     expected.assert_debug_eq(&r.all_participants(&db));
