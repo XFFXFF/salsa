@@ -2,9 +2,9 @@
 
 use crate::setup::Database;
 use crate::setup::Knobs;
+use expect_test::expect;
 use salsa::ParallelDatabase;
 use salsa_2022_tests::HasLogger;
-use expect_test::expect;
 
 pub(crate) trait Db: salsa::DbWithJar<Jar> + Knobs {}
 
@@ -29,7 +29,6 @@ pub(crate) fn b(db: &dyn Db, input: MyInput) -> i32 {
     std::thread::sleep(std::time::Duration::from_secs(3));
     input.field(db) * 20 + 2
 }
-
 
 #[test]
 fn execute() {

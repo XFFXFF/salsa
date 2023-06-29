@@ -32,13 +32,13 @@ pub(crate) struct KnobsStruct {
     crate::parallel_cycle_none_recover::Jar,
     crate::parallel_cycle_mid_recover::Jar,
     crate::parallel_cycle_all_recover::Jar,
-    crate::parallel_cancel_other_worker::Jar,
+    crate::parallel_cancel_other_worker::Jar
 )]
 #[derive(Default)]
 pub(crate) struct Database {
     storage: salsa::Storage<Self>,
     knobs: KnobsStruct,
-    logger: Logger
+    logger: Logger,
 }
 
 impl salsa::Database for Database {
