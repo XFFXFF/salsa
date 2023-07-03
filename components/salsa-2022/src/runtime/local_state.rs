@@ -1,13 +1,13 @@
 use log::debug;
 
-use crate::Database;
-use crate::DebugWithDb;
 use crate::durability::Durability;
 use crate::key::DatabaseKeyIndex;
 use crate::key::DependencyIndex;
 use crate::runtime::Revision;
 use crate::tracked_struct::Disambiguator;
 use crate::Cycle;
+use crate::Database;
+use crate::DebugWithDb;
 use crate::Runtime;
 use std::cell::RefCell;
 use std::sync::Arc;
@@ -46,7 +46,12 @@ pub(crate) struct QueryRevisions {
 }
 
 impl<Db: ?Sized + Database> DebugWithDb<Db> for QueryRevisions {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>, db: &Db, _include_all_fields: bool) -> std::fmt::Result {
+    fn fmt(
+        &self,
+        f: &mut std::fmt::Formatter<'_>,
+        db: &Db,
+        _include_all_fields: bool,
+    ) -> std::fmt::Result {
         f.debug_struct("QueryRevisions")
             .field("changed_at", &self.changed_at)
             .field("durability", &self.durability)
@@ -88,12 +93,24 @@ pub enum QueryOrigin {
 }
 
 impl<Db: ?Sized + Database> DebugWithDb<Db> for QueryOrigin {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>, db: &Db, _include_all_fields: bool) -> std::fmt::Result {
+    fn fmt(
+        &self,
+        f: &mut std::fmt::Formatter<'_>,
+        db: &Db,
+        _include_all_fields: bool,
+    ) -> std::fmt::Result {
         match self {
-            QueryOrigin::Assigned(query) => f.debug_tuple("Assigned").field(&query.debug(db)).finish(),
+            QueryOrigin::Assigned(query) => {
+                f.debug_tuple("Assigned").field(&query.debug(db)).finish()
+            }
             QueryOrigin::BaseInput => f.debug_tuple("BaseInput").finish(),
-            QueryOrigin::Derived(edges) => f.debug_tuple("Derived").field(&edges.debug(db)).finish(),
-            QueryOrigin::DerivedUntracked(edges) => f.debug_tuple("DerivedUntracked").field(&edges.debug(db)).finish(),
+            QueryOrigin::Derived(edges) => {
+                f.debug_tuple("Derived").field(&edges.debug(db)).finish()
+            }
+            QueryOrigin::DerivedUntracked(edges) => f
+                .debug_tuple("DerivedUntracked")
+                .field(&edges.debug(db))
+                .finish(),
         }
     }
 }
@@ -165,18 +182,31 @@ impl QueryEdges {
 }
 
 impl<Db: ?Sized + Database> DebugWithDb<Db> for QueryEdges {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>, db: &Db, _include_all_fields: bool) -> std::fmt::Result {
+    fn fmt(
+        &self,
+        f: &mut std::fmt::Formatter<'_>,
+        db: &Db,
+        _include_all_fields: bool,
+    ) -> std::fmt::Result {
         f.debug_struct("QueryEdges")
             .field("input_outputs", &self.input_outputs.debug(db))
             .finish()
     }
 }
 
-impl <Db: ?Sized + Database> DebugWithDb<Db> for [(EdgeKind, DependencyIndex)] {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>, db: &Db, _include_all_fields: bool) -> std::fmt::Result {
-        f.debug_list().entries(self.iter().map(|(edge_kind, dependency_index)| {
-            (edge_kind, dependency_index.debug(db))
-        })).finish()
+impl<Db: ?Sized + Database> DebugWithDb<Db> for [(EdgeKind, DependencyIndex)] {
+    fn fmt(
+        &self,
+        f: &mut std::fmt::Formatter<'_>,
+        db: &Db,
+        _include_all_fields: bool,
+    ) -> std::fmt::Result {
+        f.debug_list()
+            .entries(
+                self.iter()
+                    .map(|(edge_kind, dependency_index)| (edge_kind, dependency_index.debug(db))),
+            )
+            .finish()
     }
 }
 

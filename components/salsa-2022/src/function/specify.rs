@@ -88,7 +88,11 @@ where
             revisions,
         };
 
-        log::debug!("specify: about to add memo {:#?} for key {:?}", memo.debug(db), key);
+        log::debug!(
+            "specify: about to add memo {:#?} for key {:?}",
+            memo.debug(db),
+            key
+        );
         self.insert_memo(db, key, memo);
     }
 
@@ -127,7 +131,13 @@ where
         // If we are marking this as validated, it must be a value that was
         // assigneed by `executor`.
         match memo.revisions.origin {
-            QueryOrigin::Assigned(by_query) => assert_eq!(by_query, executor, "expected a query assigned by `{:?}`, not `{:?}`", executor.debug(db), by_query.debug(db)),
+            QueryOrigin::Assigned(by_query) => assert_eq!(
+                by_query,
+                executor,
+                "expected a query assigned by `{:?}`, not `{:?}`",
+                executor.debug(db),
+                by_query.debug(db)
+            ),
             _ => panic!(
                 "expected a query assigned by `{:?}`, not `{:?}`",
                 executor.debug(db),

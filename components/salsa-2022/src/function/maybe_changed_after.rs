@@ -134,13 +134,15 @@ where
             memo.mark_as_verified(db.as_salsa_database(), runtime, database_key_index);
             log::debug!(
                 "{:?}: shallow_verify_memo: verified (durability)",
-                database_key_index.debug(db));
+                database_key_index.debug(db)
+            );
             return true;
         }
 
         log::debug!(
             "{:?}: shallow_verify_memo: not verified",
-            database_key_index.debug(db));
+            database_key_index.debug(db)
+        );
         false
     }
 

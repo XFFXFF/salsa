@@ -3,7 +3,7 @@ use crate::{
     hash::{FxIndexMap, FxIndexSet},
     key::{DatabaseKeyIndex, DependencyIndex},
     tracked_struct::Disambiguator,
-    Cycle, Revision, Runtime, DebugWithDb, Database,
+    Cycle, Database, DebugWithDb, Revision, Runtime,
 };
 
 use super::local_state::{EdgeKind, QueryEdges, QueryOrigin, QueryRevisions};
@@ -41,7 +41,12 @@ pub(super) struct ActiveQuery {
 }
 
 impl<DB: ?Sized + Database> DebugWithDb<DB> for FxIndexSet<(EdgeKind, DependencyIndex)> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>, db: &DB, _include_all_fields: bool) -> std::fmt::Result {
+    fn fmt(
+        &self,
+        f: &mut std::fmt::Formatter<'_>,
+        db: &DB,
+        _include_all_fields: bool,
+    ) -> std::fmt::Result {
         f.debug_set()
             .entries(self.iter().map(|(kind, index)| {
                 let kind = match kind {

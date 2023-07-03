@@ -1,6 +1,8 @@
 use arc_swap::Guard;
 
-use crate::{database::AsSalsaDatabase, runtime::StampedValue, storage::HasJarsDyn, AsId, DebugWithDb};
+use crate::{
+    database::AsSalsaDatabase, runtime::StampedValue, storage::HasJarsDyn, AsId, DebugWithDb,
+};
 
 use super::{Configuration, DynDb, FunctionIngredient};
 

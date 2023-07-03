@@ -358,7 +358,8 @@ impl Runtime {
                 to_id,
                 |aqs| {
                     aqs.iter_mut().for_each(|aq| {
-                        log::debug!("cycle query adds {:#?} from {:?}", 
+                        log::debug!(
+                            "cycle query adds {:#?} from {:?}",
                             aq.input_outputs.debug(db),
                             aq.database_key_index.debug(db),
                         );
@@ -406,7 +407,10 @@ impl Runtime {
                 })
                 .for_each(|aq| {
                     log::debug!("marking {:?} for fallback", aq.database_key_index.debug(db));
-                    log::debug!("take_inputs_from cycle_query: {:#?})", cycle_query.input_outputs.debug(db));
+                    log::debug!(
+                        "take_inputs_from cycle_query: {:#?})",
+                        cycle_query.input_outputs.debug(db)
+                    );
                     aq.take_inputs_from(&cycle_query);
                     assert!(aq.cycle.is_none());
                     aq.cycle = Some(cycle.clone());

@@ -4,8 +4,8 @@ use arc_swap::{ArcSwap, Guard};
 use crossbeam_utils::atomic::AtomicCell;
 
 use crate::{
-    hash::FxDashMap, key::DatabaseKeyIndex, runtime::local_state::QueryRevisions, AsId, Event,
-    EventKind, Revision, Runtime, DebugWithDb, Database,
+    hash::FxDashMap, key::DatabaseKeyIndex, runtime::local_state::QueryRevisions, AsId, Database,
+    DebugWithDb, Event, EventKind, Revision, Runtime,
 };
 
 /// The memo map maps from a key of type `K` to the memoized value for that `K`.
@@ -90,7 +90,12 @@ pub(super) struct Memo<V> {
 }
 
 impl<V, Db: ?Sized + Database> DebugWithDb<Db> for Memo<V> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>, db: &Db, _include_all_fields: bool) -> std::fmt::Result {
+    fn fmt(
+        &self,
+        f: &mut std::fmt::Formatter<'_>,
+        db: &Db,
+        _include_all_fields: bool,
+    ) -> std::fmt::Result {
         f.debug_struct("Memo")
             // .field("value", &self.value)
             .field("verified_at", &self.verified_at)

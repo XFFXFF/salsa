@@ -32,7 +32,11 @@ where
         let revision_now = runtime.current_revision();
         let database_key_index = active_query.database_key_index;
 
-        log::info!("{:?}: executing query: {:#?}", database_key_index.debug(db), opt_old_memo.debug(db));
+        log::info!(
+            "{:?}: executing query: {:#?}",
+            database_key_index.debug(db),
+            opt_old_memo.debug(db)
+        );
 
         db.salsa_event(Event {
             runtime_id: runtime.id(),
