@@ -1,6 +1,6 @@
 use arc_swap::Guard;
 
-use crate::{database::AsSalsaDatabase, runtime::StampedValue, storage::HasJarsDyn, AsId};
+use crate::{database::AsSalsaDatabase, runtime::StampedValue, storage::HasJarsDyn, AsId, DebugWithDb};
 
 use super::{Configuration, DynDb, FunctionIngredient};
 
@@ -10,6 +10,8 @@ where
 {
     pub fn fetch(&self, db: &DynDb<C>, key: C::Key) -> &C::Value {
         let runtime = db.runtime();
+
+        log::debug!("fetch: {:?}", self.database_key_index(key).debug(db));
 
         runtime.unwind_if_revision_cancelled(db);
 

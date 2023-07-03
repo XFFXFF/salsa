@@ -2,7 +2,6 @@
 
 use crate::setup::Database;
 use crate::setup::Knobs;
-use expect_test::expect;
 use salsa::ParallelDatabase;
 use salsa_2022_tests::HasLogger;
 

@@ -239,6 +239,7 @@ impl Runtime {
         let r_new = r_old.next();
         self.shared_state.revisions[0].store(r_new);
         self.shared_state.revision_canceled.store(false);
+        log::debug!("new_revision: {:?} -> {:?}", r_old, r_new);
         r_new
     }
 
@@ -357,6 +358,10 @@ impl Runtime {
                 to_id,
                 |aqs| {
                     aqs.iter_mut().for_each(|aq| {
+                        log::debug!("cycle query adds {:#?} from {:?}", 
+                            aq.input_outputs.debug(db),
+                            aq.database_key_index.debug(db),
+                        );
                         cycle_query.add_from(aq);
                         v.push(aq.database_key_index);
                     });
@@ -379,7 +384,7 @@ impl Runtime {
         log::debug!(
             "cycle {:?}, cycle_query {:#?}",
             cycle.debug(db),
-            cycle_query,
+            cycle_query.database_key_index.debug(db),
         );
 
         // We can remove the cycle participants from the list of dependencies;
@@ -401,6 +406,7 @@ impl Runtime {
                 })
                 .for_each(|aq| {
                     log::debug!("marking {:?} for fallback", aq.database_key_index.debug(db));
+                    log::debug!("take_inputs_from cycle_query: {:#?})", cycle_query.input_outputs.debug(db));
                     aq.take_inputs_from(&cycle_query);
                     assert!(aq.cycle.is_none());
                     aq.cycle = Some(cycle.clone());
