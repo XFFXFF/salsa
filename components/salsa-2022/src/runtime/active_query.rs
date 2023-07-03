@@ -3,7 +3,7 @@ use crate::{
     hash::{FxIndexMap, FxIndexSet},
     key::{DatabaseKeyIndex, DependencyIndex},
     tracked_struct::Disambiguator,
-    Cycle, Revision, Runtime,
+    Cycle, Database, DebugWithDb, Revision, Runtime,
 };
 
 use super::local_state::{EdgeKind, QueryEdges, QueryOrigin, QueryRevisions};
@@ -38,6 +38,25 @@ pub(super) struct ActiveQuery {
     /// hash is added to this map. If it is not present, then the disambiguator is 0.
     /// Otherwise it is 1 more than the current value (which is incremented).
     pub(super) disambiguator_map: FxIndexMap<u64, Disambiguator>,
+}
+
+impl<DB: ?Sized + Database> DebugWithDb<DB> for FxIndexSet<(EdgeKind, DependencyIndex)> {
+    fn fmt(
+        &self,
+        f: &mut std::fmt::Formatter<'_>,
+        db: &DB,
+        _include_all_fields: bool,
+    ) -> std::fmt::Result {
+        f.debug_set()
+            .entries(self.iter().map(|(kind, index)| {
+                let kind = match kind {
+                    EdgeKind::Input => "input",
+                    EdgeKind::Output => "output",
+                };
+                format!("{}: {:?}", kind, index.debug(db))
+            }))
+            .finish()
+    }
 }
 
 impl ActiveQuery {
@@ -132,6 +151,10 @@ impl ActiveQuery {
     pub(crate) fn take_inputs_from(&mut self, cycle_query: &ActiveQuery) {
         self.changed_at = cycle_query.changed_at;
         self.durability = cycle_query.durability;
+        // self.input_outputs = cycle_query.input_outputs.iter().filter(|(edge_kind, database_key_index)| {
+        //     *edge_kind == EdgeKind::Input
+        // })
+        // .copied().collect::<FxIndexSet<(EdgeKind, DependencyIndex)>>();
         self.input_outputs = cycle_query.input_outputs.clone();
     }
 

@@ -4,6 +4,7 @@ use std::panic::{RefUnwindSafe, UnwindSafe};
 
 use expect_test::expect;
 use salsa::Durability;
+use test_log::test;
 
 // Axes:
 //

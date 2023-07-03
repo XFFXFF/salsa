@@ -80,7 +80,7 @@ where
             "{:?}: maybe_changed_after_cold, successful claim, revision = {:?}, old_memo = {:#?}",
             database_key_index.debug(db),
             revision,
-            old_memo
+            old_memo.debug(db)
         );
 
         // Check if the inputs are still valid and we can just compare `changed_at`.
@@ -117,20 +117,32 @@ where
         log::debug!(
             "{:?}: shallow_verify_memo(memo = {:#?})",
             database_key_index.debug(db),
-            memo,
+            memo.debug(db),
         );
 
         if verified_at == revision_now {
             // Already verified.
+            log::debug!(
+                "{:?}: shallow_verify_memo: already verified",
+                database_key_index.debug(db)
+            );
             return true;
         }
 
         if memo.check_durability(runtime) {
             // No input of the suitable durability has changed since last verified.
             memo.mark_as_verified(db.as_salsa_database(), runtime, database_key_index);
+            log::debug!(
+                "{:?}: shallow_verify_memo: verified (durability)",
+                database_key_index.debug(db)
+            );
             return true;
         }
 
+        log::debug!(
+            "{:?}: shallow_verify_memo: not verified",
+            database_key_index.debug(db)
+        );
         false
     }
 
@@ -154,7 +166,7 @@ where
         log::debug!(
             "{:?}: deep_verify_memo(old_memo = {:#?})",
             database_key_index.debug(db),
-            old_memo
+            old_memo.debug(db)
         );
 
         if self.shallow_verify_memo(db, runtime, database_key_index, old_memo) {
@@ -190,8 +202,18 @@ where
                     match edge_kind {
                         EdgeKind::Input => {
                             if db.maybe_changed_after(dependency_index, last_verified_at) {
+                                log::debug!(
+                                    "{:?}: deep_verify_memo: input {:?} changed",
+                                    database_key_index.debug(db),
+                                    dependency_index.debug(db)
+                                );
                                 return false;
                             }
+                            log::debug!(
+                                "{:?}: deep_verify_memo: input {:?} did not change",
+                                database_key_index.debug(db),
+                                dependency_index.debug(db)
+                            );
                         }
                         EdgeKind::Output => {
                             // Subtle: Mark outputs as validated now, even though we may
@@ -210,6 +232,11 @@ where
                             // by this function cannot be read until this function is marked green,
                             // so even if we mark them as valid here, the function will re-execute
                             // and overwrite the contents.
+                            log::debug!(
+                                "{:?}: deep_verify_memo: output {:?} did not change",
+                                database_key_index.debug(db),
+                                dependency_index.debug(db)
+                            );
                             db.mark_validated_output(database_key_index, dependency_index);
                         }
                     }

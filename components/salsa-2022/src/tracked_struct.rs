@@ -91,6 +91,7 @@ where
             data,
         };
         let result = self.interned.intern(runtime, entity_key);
+        log::debug!("new_struct: adding output: {:?}", self.debug_name,);
         runtime.add_output(self.database_key_index(result).into());
         result
     }
