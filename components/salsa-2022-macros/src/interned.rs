@@ -34,6 +34,8 @@ impl std::ops::Deref for InternedStruct {
 impl crate::options::AllowedOptions for InternedStruct {
     const RETURN_REF: bool = false;
 
+    const DEBUG: bool = true;
+
     const SPECIFY: bool = false;
 
     const NO_EQ: bool = false;
@@ -62,7 +64,11 @@ impl InternedStruct {
         let as_id_impl = self.as_id_impl();
         let named_fields_impl = self.inherent_impl_for_named_fields();
         let salsa_struct_in_db_impl = self.salsa_struct_in_db_impl();
-        let as_debug_with_db_impl = self.as_debug_with_db_impl();
+        let as_debug_with_db_impl = if self.should_impl_debug() {
+            Some(self.as_debug_with_db_impl())
+        } else {
+            None
+        };
 
         Ok(quote! {
             #id_struct

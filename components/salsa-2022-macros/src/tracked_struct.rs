@@ -28,6 +28,8 @@ impl std::ops::Deref for TrackedStruct {
 impl crate::options::AllowedOptions for TrackedStruct {
     const RETURN_REF: bool = false;
 
+    const DEBUG: bool = true;
+
     const SPECIFY: bool = false;
 
     const NO_EQ: bool = false;
@@ -60,7 +62,12 @@ impl TrackedStruct {
         let salsa_struct_in_db_impl = self.salsa_struct_in_db_impl();
         let tracked_struct_in_db_impl = self.tracked_struct_in_db_impl();
         let as_id_impl = self.as_id_impl();
-        let as_debug_with_db_impl = self.as_debug_with_db_impl();
+        let as_debug_with_db_impl = if self.should_impl_debug() {
+            Some(self.as_debug_with_db_impl())
+        } else {
+            None
+        };
+        
         Ok(quote! {
             #(#config_structs)*
             #id_struct

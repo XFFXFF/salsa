@@ -61,6 +61,11 @@ pub(crate) struct Options<A: AllowedOptions> {
     /// If this is `Some`, the value is the `<ident>`.
     pub constructor_name: Option<syn::Ident>,
 
+    /// The `debug` option is used to signal that whether the `DebugWithDb` trait should be implemented.
+    /// 
+    /// If this is `Some`, the value is the `debug` identifier.
+    pub debug: Option<syn::Ident>,
+
     /// Remember the `A` parameter, which plays no role after parsing.
     phantom: PhantomData<A>,
 }
@@ -79,6 +84,7 @@ impl<A: AllowedOptions> Default for Options<A> {
             phantom: Default::default(),
             lru: Default::default(),
             singleton: Default::default(),
+            debug: Default::default(),
         }
     }
 }
@@ -86,6 +92,7 @@ impl<A: AllowedOptions> Default for Options<A> {
 /// These flags determine which options are allowed in a given context
 pub(crate) trait AllowedOptions {
     const RETURN_REF: bool;
+    const DEBUG: bool;
     const SPECIFY: bool;
     const NO_EQ: bool;
     const SINGLETON: bool;
@@ -134,6 +141,17 @@ impl<A: AllowedOptions> syn::parse::Parse for Options<A> {
                     return Err(syn::Error::new(
                         ident.span(),
                         "`return_ref` option not allowed here",
+                    ));
+                }
+            } else if ident == "debug" {
+                if A::DEBUG {
+                    if let Some(old) = std::mem::replace(&mut options.debug, Some(ident)) {
+                        return Err(syn::Error::new(old.span(), "option `debug` provided twice"));
+                    }
+                } else {
+                    return Err(syn::Error::new(
+                        ident.span(),
+                        "`debug` option not allowed here",
                     ));
                 }
             } else if ident == "no_eq" {

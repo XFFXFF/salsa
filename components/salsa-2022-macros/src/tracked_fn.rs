@@ -61,6 +61,8 @@ struct TrackedFn;
 impl crate::options::AllowedOptions for TrackedFn {
     const RETURN_REF: bool = true;
 
+    const DEBUG: bool = false;
+
     const SPECIFY: bool = true;
 
     const NO_EQ: bool = true;
@@ -162,6 +164,8 @@ struct TrackedImpl;
 
 impl crate::options::AllowedOptions for TrackedImpl {
     const RETURN_REF: bool = false;
+
+    const DEBUG: bool = false;
 
     const SPECIFY: bool = false;
 

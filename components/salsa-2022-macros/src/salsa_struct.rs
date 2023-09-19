@@ -143,6 +143,10 @@ impl<A: AllowedOptions> SalsaStruct<A> {
         self.args.singleton.is_some()
     }
 
+    pub(crate) fn should_impl_debug(&self) -> bool {
+        self.args.debug.is_some()
+    }
+
     pub(crate) fn db_dyn_ty(&self) -> syn::Type {
         let jar_ty = self.jar_ty();
         parse_quote! {
