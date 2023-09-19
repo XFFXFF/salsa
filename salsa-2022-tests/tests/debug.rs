@@ -18,7 +18,7 @@ struct NotSalsa {
     field: String,
 }
 
-#[salsa::input]
+#[salsa::input(debug)]
 struct ComplexStruct {
     my_input: MyInput,
     not_salsa: NotSalsa,

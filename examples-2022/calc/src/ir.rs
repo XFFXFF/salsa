@@ -26,7 +26,7 @@ pub struct FunctionId {
 // ANCHOR_END: interned_ids
 
 // ANCHOR: program
-#[salsa::tracked]
+#[salsa::tracked(debug)]
 pub struct Program {
     #[return_ref]
     pub statements: Vec<Statement>,
