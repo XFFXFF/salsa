@@ -16,8 +16,12 @@ for commit in "${!commit_to_version[@]}"; do
   git checkout $commit
   mdbook build
   version_dir="versions/${commit_to_version[$commit]}"
-  mv book $version_dir
+  mv book/html $version_dir
+  rm -rf book
 done
+
+# Move _redirects to the root directory
+mv _redirects versions
 
 # Return to the original branch or commit
 git checkout $original_branch
