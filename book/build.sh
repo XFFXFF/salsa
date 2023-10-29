@@ -20,7 +20,7 @@ for commit in "${!commit_to_version[@]}"; do
   mdbook build
   version_dir="versions/${commit_to_version[$commit]}"
   mkdir -p $version_dir  # Ensure the target directory exists
-  mv book/html $version_dir
+  mv book/html/* $version_dir
   rm -rf book
 done
 
