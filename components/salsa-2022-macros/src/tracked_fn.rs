@@ -1,7 +1,7 @@
 use proc_macro2::{Literal, TokenStream};
 use syn::spanned::Spanned;
 use syn::visit_mut::VisitMut;
-use syn::{ReturnType, Token};
+use syn::{ReturnType, Token, Visibility};
 
 use crate::configuration::{self, Configuration, CycleRecoveryStrategy};
 use crate::options::Options;
@@ -99,6 +99,7 @@ pub(crate) fn tracked_impl(
         }
     };
     let self_type_name = &self_type.path.segments.last().unwrap().ident;
+    dbg!(&item_impl.trait_);
     let name_prefix = match &item_impl.trait_ {
         Some((_, trait_name, _)) => format!(
             "{}_{}",
@@ -320,7 +321,7 @@ fn key_tuple_ty(item_fn: &syn::ItemFn) -> syn::Type {
 
 fn configuration_struct(item_fn: &syn::ItemFn) -> syn::ItemStruct {
     let fn_name = item_fn.sig.ident.clone();
-    let visibility = &item_fn.vis;
+    let visibility = &quote!(pub(crate));
 
     let salsa_struct_ty = salsa_struct_ty(item_fn);
     let intern_map: syn::Type = match function_type(item_fn) {
